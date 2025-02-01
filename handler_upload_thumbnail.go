@@ -62,6 +62,10 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
   }
   // this has a period already
   fileExtension := fileExtensions[0]
+  if fileExtension != ".jpeg" && fileExtension != ".png" {
+    respondWithError(w, http.StatusUnsupportedMediaType, "File type not supported. Use jpeg or png.", err)
+    return
+  }
 
   videoMetadata, err := cfg.db.GetVideo(videoID);
   if err != nil {
