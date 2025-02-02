@@ -261,7 +261,9 @@ function viewVideo(video) {
     thumbnailImg.style.display = 'none';
   } else {
     thumbnailImg.style.display = 'block';
-    thumbnailImg.src = `${video.thumbnail_url}?v=${Date.now()}`;
+    // in Firefox you might want to keep using this:
+    // thumbnailImg.src = `${video.thumbnail_url}?v=${Date.now()}`;
+    thumbnailImg.src = `${video.thumbnail_url}`;
   }
 
   const videoPlayer = document.getElementById('video-player');
