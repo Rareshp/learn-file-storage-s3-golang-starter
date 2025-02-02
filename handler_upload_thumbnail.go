@@ -7,6 +7,8 @@ import (
   "os"
   "path/filepath"
   "mime"
+  "crypto/rand"
+  "encoding/base64"
 
 	"github.com/bootdotdev/learn-file-storage-s3-golang-starter/internal/auth"
 	_ "github.com/bootdotdev/learn-file-storage-s3-golang-starter/internal/database"
@@ -77,9 +79,18 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+  // generate unique string to be used in file name and URL
+  b := make([]byte, 32);
+  _, err = rand.Read(b);
+  if err != nil {
+    respondWithError(w, http.StatusInternalServerError, "Issue with generating file name", err)
+    return
+  }
+  random64string := base64.RawURLEncoding.EncodeToString(b)
+
   // the write file needs the bytes form
   // /assetsRoot/<videoID>.<file_extension>
-  fullPath2File := filepath.Join(cfg.assetsRoot, fmt.Sprintf("%s%s", videoIDString, fileExtension) );
+  fullPath2File := filepath.Join(cfg.assetsRoot, fmt.Sprintf("%s%s", random64string, fileExtension) );
 
   // do not use os.WriteFile because the file is multipart; might be in process
   thumbFile, err := os.Create(fullPath2File);
@@ -96,7 +107,7 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
     return
   }
 
-  thumbnailURL := fmt.Sprintf("http://localhost:%s/assets/%s%s", cfg.port, videoIDString, fileExtension);
+  thumbnailURL := fmt.Sprintf("http://localhost:%s/assets/%s%s", cfg.port, random64string, fileExtension);
 
   videoMetadata.ThumbnailURL = &thumbnailURL;
 
